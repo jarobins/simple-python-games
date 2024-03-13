@@ -1,6 +1,8 @@
 import pygame
 import sys
 
+import pygame.font
+
 # Initialize Pygame
 pygame.init()
 
@@ -14,6 +16,47 @@ WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 RED = (255, 0, 0)
 BLUE = (0, 0, 255)
+
+
+class Scoreboard:
+    """A class to report scoring information."""
+
+    def __init__(self, x=10, y=10, font_size=30, font_color=(0, 0, 0)):
+        """Initialize scorekeeping attributes."""
+        self.screen = screen
+        self.screen_rect = screen.get_rect()
+        self.score = 0
+
+        self.score_image = None
+        self.score_rect = None
+
+        # Font settings for scoring information.
+        self.font_color = font_color
+        self.font = pygame.font.SysFont(None, font_size)
+
+        # Prepare the initial score image.
+        self.x = x
+        self.y = y
+        self.prep_score()
+
+    def prep_score(self):
+        """Turn the score into a rendered image."""
+        score_str = str(self.score)
+        self.score_image = self.font.render(score_str, True, self.font_color)
+
+        # Display the score at the top left of the screen.
+        self.score_rect = self.score_image.get_rect()
+        self.score_rect.x = self.x
+        self.score_rect.y = self.y
+
+    def show_score(self):
+        """Draw score to the screen."""
+        self.screen.blit(self.score_image, self.score_rect)
+
+    def update_score(self, points):
+        """Updates the score."""
+        self.score += points
+        self.prep_score()
 
 
 class Ball:
@@ -118,6 +161,9 @@ def main():
     # Create bricks
     bricks = create_bricks()
 
+    # Create the scoreboard
+    scoreboard = Scoreboard()
+
     running = True
 
     while running:
@@ -146,6 +192,8 @@ def main():
                     if ball.y - ball.radius <= brick.y + brick.height:
                         ball.direction_y *= -1
                         brick.visible = False
+                        scoreboard.update_score(10)
+                        ball.speed += .1
 
         # Clear the screen
         screen.fill(WHITE)
@@ -153,6 +201,7 @@ def main():
         # Draw game objects
         ball.draw()
         bar.draw()
+        scoreboard.show_score()
         for brick in bricks:
             brick.draw()
 
